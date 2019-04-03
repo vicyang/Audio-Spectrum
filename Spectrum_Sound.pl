@@ -30,7 +30,7 @@ our @frame;
 our $flen;
 #LoadPCM::init( "RELOADED - Dead Island installer.wav" );
 #LoadPCM::init("MiaoPai.wav");
-LoadPCM::init("Animals.wav");
+LoadPCM::init("audiofiles/Animals.wav");
 LoadPCM::load_data_chunk( \@frame, \$flen );
 our $bits = $LoadPCM::fmt{"BitsPerSample"};
 our $channels = $LoadPCM::fmt{"Channels"};
