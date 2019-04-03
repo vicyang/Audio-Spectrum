@@ -10,8 +10,6 @@ use OpenGL::Config;
 use Math::FFT;
 use Time::HiRes qw/time sleep/;
 use Try::Tiny;
-use threads;
-use threads::shared;
 use Win32::Sound;
 use LoadPCM;
 
@@ -36,15 +34,10 @@ our $bits = $LoadPCM::fmt{"BitsPerSample"};
 our $channels = $LoadPCM::fmt{"Channels"};
 our $Hz = $LoadPCM::fmt{"SamplesPerSec"};
 our $move = $Hz / $FPS;
+Win32::Sound::Play("audiofiles/Animals.wav", SND_ASYNC );
 
 printf "Frames: %d %d, Move step: %d\n", $flen, $#frame, $move;
 die "frame data error" if not defined $frame[0]->[0];
-
-my $data = join "", map { pack("S", $_->[0]) } @frame;
-my $th = threads->create( \&play, $data, $Hz, 16 );
-
-#while ( $th->is_running() ) { sleep 0.2 };
-#$th->detach();
 
 &Main();
 
@@ -199,15 +192,4 @@ sub Main
     glutKeyboardFunc(\&hitkey);
     glutIdleFunc(\&idle);
     glutMainLoop();
-}
-
-sub play
-{
-    my ($data, $Hz, $bits) = @_;
-    # Create the object
-    my $WAV = new Win32::Sound::WaveOut($Hz, $bits, 1);
-    $WAV->Load($data);       # get it
-    $WAV->Write();           # hear it
-    1 until $WAV->Status();  # wait for completion
-    $WAV->Unload();          # drop it
 }
