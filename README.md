@@ -1,8 +1,12 @@
 # Audio-Spectrum
 Audio-Spectrum, Visualization
 
+### 模块
+  * 音频播放
+    Win32::Sound - 支持非阻塞播放，在 play 的时候指定 __SND_ASYNC__ FLAG（字面常量）
+    Win32::MediaPlayer - 支持非阻塞播放，可以设置指定起点，在播放时可以获取进度。
 
-# 知识整理
+### 知识整理
   * 双缓冲播放
     Double Buffering for Audio
     
@@ -15,4 +19,3 @@ Audio-Spectrum, Visualization
 
     当音频采样为 8000Hz，帧率为20fps 时，绘图数据采样率为 400Hz，
     若 FFT 采样的数据量是 1024，则偏移到末位，再取1024的长度会导致溢出。需要补0处理
-
