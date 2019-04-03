@@ -28,20 +28,58 @@ our $wavfile = "audiofiles/Animals.wav";
 our @frame;
 our $flen;
 
-LoadPCM::init( $wavfile );
+my $wav = LoadPCM::init( $wavfile );
 LoadPCM::load_data_chunk( \@frame, \$flen );
 our $bits = $LoadPCM::fmt{"BitsPerSample"};
 our $channels = $LoadPCM::fmt{"Channels"};
 our $Hz = $LoadPCM::fmt{"SamplesPerSec"};
 our $move = $Hz / $FPS;
 
-Win32::Sound::Volume('20%');
-Win32::Sound::Play( $wavfile, SND_ASYNC );
+sub play
+{
+    our $wavefile;
+    Win32::Sound::Volume('20%');
+    Win32::Sound::Play( $wavfile, SND_ASYNC );
+}
 
 printf "Frames: %d %d, Move step: %d\n", $flen, $#frame, $move;
 die "frame data error" if not defined $frame[0]->[0];
 
 &Main();
+
+sub find_spec
+{
+    my ($data) = @_;
+    # notes: 线性扫描不可以跳跃扫描（$id+=2），必须逐个位扫描，否则可能会略过关键值
+    # 以及 Math::FFT 产生的最后一个值可能很特殊，if 判断最好使用相减求绝对值的方式对比。
+    my $spec = [];
+    for my $id ( 1 .. $#$data-1 ) {
+        if ( abs($data->[$id-1]-$data->[$id])>100.0 and abs($data->[$id]-$data->[$id+1])>100.0 ) {
+            #printf "%d %f %f %f\n", $id, $data->[$id-1], $data->[$id], $data->[$id+1];
+            push @$spec, [ $id, $data->[$id] ];
+        }
+    }
+    return $spec;
+}
+
+sub reduce_spec
+{
+    my ($data, $maxfreq, $parts) = @_;
+    my $spec = [];
+    my $step = $maxfreq / $parts;
+    my ($accum, $max) = (0, 0);
+
+    for my $id ( 1 .. $#$data-1 ) {
+        if ( $id % $step == 0 ) {
+            $max *= 0.01;
+            $max = $max > 300.0 ? $max * 0.01 : $max;
+            push @$spec, [ $id, $max ];
+            ($accum, $max) = (0, 0);
+        }
+        $max = $data->[$id] if ($data->[$id] > $max);
+    }
+    return $spec;
+}
 
 sub display 
 {
@@ -50,6 +88,8 @@ sub display
     state $offset = 0;
     state $repeat = 0;
     state $time_dt = 0.0;
+    state $time_pass = 0.0;
+    state $played = 0;
 
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -71,8 +111,7 @@ sub display
 
     glBegin(GL_LINE_STRIP);
     #glBegin(GL_POINTS);
-    for my $id ( $offset .. $offset+$points-1 )
-    {
+    for my $id ( $offset .. $offset+$points-1 ) {
         glVertex3f( ($id-$offset)*$xscale, $frame[$id]->[$ch]*$yscale, 0.0 );
     }
     glEnd();
@@ -81,9 +120,19 @@ sub display
     my $fft = Math::FFT->new($series);
     my $coeff = $fft->rdft();
     my $spectrum = $fft->spctrm;
+    my $spec = reduce_spec( $spectrum, 200, 20 );
+
+    $time_pass = time() - $time_a;
+    if ($time_pass >= 2.0 and $played == 0)
+    {
+        printf "play";
+        play();
+        sleep 0.1;
+        $played = 1;
+    }
 
     if ( $offset < ($flen-$move*2-1) ) {
-        $offset += $move;
+        $offset += $move if ( $played == 1 );
     } else {
         $repeat ++;
         #$offset = 0;
@@ -92,19 +141,23 @@ sub display
     try { $frame[$offset+$points]->[$ch] * 1 or die } catch { printf "Over %d", $offset; destroy() };
 
     glTranslatef(200.0, -200.0, 0.0);
-    my $ref = $spectrum;
-    glColor3f(1.0, 1.0, 0.0);
-    glBegin(GL_LINE_STRIP);
+    my $ref = $spec;
+    glColor3f(0.9, 0.8, 0.3);
+    glBegin( GL_QUADS );
     for my $id ( 0 .. $#$ref )
     {
-        glVertex3f( $id * $xscale * 1.2, $ref->[$id] * $yscale * 0.5, 0.0  );
+        #glVertex3f( $id * $xscale * 1.2, $ref->[$id] * $yscale * 0.5, 0.0  );
+        glVertex3f( $ref->[$id][0], $ref->[$id][1], 0.0  );
+        glVertex3f( $ref->[$id][0]-6.0, $ref->[$id][1], 0.0  );
+        glVertex3f( $ref->[$id][0]-6.0, 0.0, 0.0  );
+        glVertex3f( $ref->[$id][0],  0.0, 0.0  );
     }
     glEnd();
 
     glPopMatrix();
 
     our ($W, $H);
-    if ( $repeat == 0 ) { $time_dt = time()-$time_a; }
+    if ( $repeat == 0 and $played ) { $time_dt = time()-$time_a; }
     glRasterPos3f( $RIGHT-100.0, $TOP-20.0, 0.0);
     glutBitmapString( GLUT_BITMAP_9_BY_15, sprintf "%.2f FPS\n", $FPS );
     glutBitmapString( GLUT_BITMAP_9_BY_15, sprintf "%.2f s", $time_dt );

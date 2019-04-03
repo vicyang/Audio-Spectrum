@@ -1,7 +1,6 @@
 package LoadPCM;
 use Fcntl qw/:seek/;
 
-our $file = "chord.wav";  #default
 our $fh;
 our %fmt;
 our %data;
