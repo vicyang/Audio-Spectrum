@@ -19,3 +19,12 @@ Audio-Spectrum, Visualization
 
     当音频采样为 8000Hz，帧率为20fps 时，绘图数据采样率为 400Hz，
     若 FFT 采样的数据量是 1024，则偏移到末位，再取1024的长度会导致溢出。需要补0处理
+
+  * WAV
+    * fmt_Chunk
+      即使是PCM波形数据，fmt_Chunk 也有可能包含 wExtend 字段（该项为0）。所以读取的时候还是应该获取 ChunkSize 按实际长度处理。
+
+      
+
+
+
