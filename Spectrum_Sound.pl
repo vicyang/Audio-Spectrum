@@ -3,8 +3,8 @@
     因为每一次取样的范围是 ($offset .. $offset + $points) 而 if 判断后还会加一次 $points 的距离
 =cut
 
-#use Modern::Perl;
-use feature qw/state/;
+use Modern::Perl;
+#use feature qw/state/;
 use OpenGL qw/ :all /;
 use OpenGL::Config;
 use Math::FFT;
@@ -24,17 +24,19 @@ our $WinID;
 our $PI  = 3.1415926536;
 our $PI2 = $PI * 2;
 
+our $wavfile = "audiofiles/Animals.wav";
 our @frame;
 our $flen;
-#LoadPCM::init( "RELOADED - Dead Island installer.wav" );
-#LoadPCM::init("MiaoPai.wav");
-LoadPCM::init("audiofiles/Animals.wav");
+
+LoadPCM::init( $wavfile );
 LoadPCM::load_data_chunk( \@frame, \$flen );
 our $bits = $LoadPCM::fmt{"BitsPerSample"};
 our $channels = $LoadPCM::fmt{"Channels"};
 our $Hz = $LoadPCM::fmt{"SamplesPerSec"};
 our $move = $Hz / $FPS;
-Win32::Sound::Play("audiofiles/Animals.wav", SND_ASYNC );
+
+Win32::Sound::Volume('20%');
+Win32::Sound::Play( $wavfile, SND_ASYNC );
 
 printf "Frames: %d %d, Move step: %d\n", $flen, $#frame, $move;
 die "frame data error" if not defined $frame[0]->[0];
