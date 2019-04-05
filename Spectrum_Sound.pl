@@ -24,22 +24,22 @@ our $WinID;
 our $PI  = 3.1415926536;
 our $PI2 = $PI * 2;
 
-our $wavfile = "audiofiles/Animals.wav";
-our @frame;
-our $flen;
+our $wavefile = "audiofiles/Marine.wav";
 
-my $wav = LoadPCM::init( $wavfile );
-LoadPCM::load_data_chunk( \@frame, \$flen );
-our $bits = $LoadPCM::fmt{"BitsPerSample"};
-our $channels = $LoadPCM::fmt{"Channels"};
-our $Hz = $LoadPCM::fmt{"SamplesPerSec"};
+our $wave = LoadPCM->new($wavefile);
+our $info = $wave->info();
+our @frame = $wave->data();
+our $flen = $info->{'DataLength'};
+our $channels = $info->{"Channels"};
+our $bits = $info->{"BitsPerSample"};
+our $Hz = $info->{"SamplesPerSec"};
 our $move = $Hz / $FPS;
 
 sub play
 {
     our $wavefile;
     Win32::Sound::Volume('20%');
-    Win32::Sound::Play( $wavfile, SND_ASYNC );
+    Win32::Sound::Play( $wavefile, SND_ASYNC );
 }
 
 printf "Frames: %d %d, Move step: %d\n", $flen, $#frame, $move;
