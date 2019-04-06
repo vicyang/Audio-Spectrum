@@ -51,21 +51,6 @@ die "frame data error" if not defined $frame[0]->[0];
 
 &Main();
 
-sub find_spec
-{
-    my ($data) = @_;
-    # notes: 线性扫描不可以跳跃扫描（$id+=2），必须逐个位扫描，否则可能会略过关键值
-    # 以及 Math::FFT 产生的最后一个值可能很特殊，if 判断最好使用相减求绝对值的方式对比。
-    my $spec = [];
-    for my $id ( 1 .. $#$data-1 ) {
-        if ( abs($data->[$id-1]-$data->[$id])>100.0 and abs($data->[$id]-$data->[$id+1])>100.0 ) {
-            #printf "%d %f %f %f\n", $id, $data->[$id-1], $data->[$id], $data->[$id+1];
-            push @$spec, [ $id, $data->[$id] ];
-        }
-    }
-    return $spec;
-}
-
 sub reduce_spec
 {
     my ($data, $maxfreq, $parts) = @_;
@@ -107,7 +92,7 @@ sub display
     #if ($bits == 8 ) { glTranslatef(0.0, 50.0, 0.0); }
     glColor3f(1.0, 0.0, 0.0);
 
-    my $points = 1024;
+    my $points = 4096;
     my $yscale = 0.01;
     my $xscale = ($SIZE_X-10.0) /$points;
     #my $ch = $channels > 1 ? 1 : 1;
