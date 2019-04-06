@@ -4,13 +4,17 @@
 =cut
 
 use Modern::Perl;
+use FindBin;
+use lib $FindBin::Bin ."/lib";
+
 #use feature qw/state/;
 use OpenGL qw/ :all /;
 use OpenGL::Config;
-use Math::FFT;
+
 use Time::HiRes qw/time sleep/;
 use Try::Tiny;
 use Win32::Sound;
+use Math::FFT;
 use LoadPCM;
 
 STDOUT->autoflush(1);
