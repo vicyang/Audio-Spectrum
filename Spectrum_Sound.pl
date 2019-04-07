@@ -24,7 +24,8 @@ our $WinID;
 our $PI  = 3.1415926536;
 our $PI2 = $PI * 2;
 
-our $wavefile = "audiofiles/Marine.wav";
+our $wavefile = "audiofiles/Marine_60s.wav";
+#our $wavefile = "audiofiles/Animals.wav";
 
 our $wave = LoadPCM->new($wavefile);
 our $info = $wave->info();
