@@ -5,6 +5,8 @@ Audio-Spectrum, Visualization
   * 音频播放
     Win32::Sound - 支持非阻塞播放，在 play 的时候指定 __SND_ASYNC__ FLAG（字面常量）
     Win32::MediaPlayer - 支持非阻塞播放，可以设置指定起点，在播放时可以获取进度。
+  * 数学模块
+    Math::FFT
 
 ### 知识整理
   * 双缓冲播放
