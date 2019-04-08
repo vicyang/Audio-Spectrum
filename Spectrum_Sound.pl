@@ -29,7 +29,7 @@ our $PI  = 3.1415926536;
 our $PI2 = $PI * 2;
 
 our $wavefile = "audiofiles/Marine_60s.wav";
-#our $wavefile = "audiofiles/Animals.wav";
+#our $wavefile = "audiofiles/13_stendeck-broken_hearts_carillion.wav";
 
 our $wave = LoadPCM->new($wavefile);
 our $info = $wave->info();
@@ -61,9 +61,9 @@ sub reduce_spec
 
     for my $id ( 1 .. $#$data-1 ) {
         if ( $id % $step == 0 ) {
-            $max *= 0.01;
-            $max = $max > 300.0 ? $max * 0.01 : $max;
-            push @$spec, [ $id, $max ];
+            #$max *= 0.01;
+            #$max = $max > 300.0 ? $max * 0.01 : $max;
+            push @$spec, [ $id, sqrt($max*2)/20.0 ];
             ($accum, $max) = (0, 0);
         }
         $max = $data->[$id] if ($data->[$id] > $max);
@@ -93,7 +93,7 @@ sub display
     #if ($bits == 8 ) { glTranslatef(0.0, 50.0, 0.0); }
     glColor3f(1.0, 0.0, 0.0);
 
-    my $points = 4096;
+    my $points = 1024;
     my $yscale = 0.01;
     my $xscale = ($SIZE_X-10.0) /$points;
     #my $ch = $channels > 1 ? 1 : 1;
