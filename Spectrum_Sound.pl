@@ -28,8 +28,8 @@ our $WinID;
 our $PI  = 3.1415926536;
 our $PI2 = $PI * 2;
 
-our $wavefile = "audiofiles/Marine_60s.wav";
-#our $wavefile = "audiofiles/13_stendeck-broken_hearts_carillion.wav";
+#our $wavefile = "audiofiles/Marine_60s.wav";
+our $wavefile = "audiofiles/Animals.wav";
 
 our $wave = LoadPCM->new($wavefile);
 our $info = $wave->info();
@@ -56,16 +56,16 @@ sub reduce_spec
 {
     my ($data, $maxfreq, $parts) = @_;
     my $spec = [];
-    my $step = $maxfreq / $parts;
+    my $step = 512/32;
     my ($accum, $max) = (0, 0);
 
     for my $id ( 1 .. $#$data-1 ) {
         if ( $id % $step == 0 ) {
-            #$max *= 0.01;
-            #$max = $max > 300.0 ? $max * 0.01 : $max;
-            push @$spec, [ $id, sqrt($max*2)/20.0 ];
+            $max = $max > 10 ? $max : 1;
+            push @$spec, [ $id, (log(sqrt($max*2))/log(2))*20.0 ];
             ($accum, $max) = (0, 0);
         }
+        #$max += $data->[$id];
         $max = $data->[$id] if ($data->[$id] > $max);
     }
     return $spec;
